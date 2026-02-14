@@ -1,6 +1,3 @@
-import React from "react";
-import "./dashboard.css";
-
 type User = {
   name: string;
   age: number;
