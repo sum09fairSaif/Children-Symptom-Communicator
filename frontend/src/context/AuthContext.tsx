@@ -64,10 +64,32 @@ function LocalAuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     if (email && password) {
-      const userData: User = {
-        email,
-        name: email.split("@")[0],
-      };
+      // Try to retrieve existing user data from localStorage
+      const savedUser = localStorage.getItem("user");
+      let userData: User;
+
+      if (savedUser) {
+        // If user data exists, use it to preserve name and other info
+        const parsedUser = JSON.parse(savedUser);
+        // Case-insensitive email comparison
+        if (parsedUser.email.toLowerCase().trim() === email.toLowerCase().trim()) {
+          // Same user logging back in - use their saved data
+          userData = parsedUser;
+        } else {
+          // Different user - create new user data
+          userData = {
+            email,
+            name: email.split("@")[0],
+          };
+        }
+      } else {
+        // No saved user - create new user data
+        userData = {
+          email,
+          name: email.split("@")[0],
+        };
+      }
+
       setUser(userData);
       localStorage.setItem("user", JSON.stringify(userData));
       return true;
@@ -145,7 +167,17 @@ function Auth0BackedAuthProvider({ children }: { children: ReactNode }) {
     }
 
     const saved = localStorage.getItem(getProfileStorageKey(storageId));
-    setProfileData(saved ? JSON.parse(saved) : {});
+    const parsedData = saved ? JSON.parse(saved) : {};
+
+    // Check if there's a pending name from registration
+    const pendingName = sessionStorage.getItem('pending-user-name');
+    if (pendingName && !parsedData.name) {
+      parsedData.name = pendingName;
+      localStorage.setItem(getProfileStorageKey(storageId), JSON.stringify(parsedData));
+      sessionStorage.removeItem('pending-user-name');
+    }
+
+    setProfileData(parsedData);
   }, [storageId]);
 
   useEffect(() => {
@@ -182,8 +214,14 @@ function Auth0BackedAuthProvider({ children }: { children: ReactNode }) {
     return true;
   };
 
-  const register = async (email: string): Promise<boolean> => {
+  const register = async (email: string, password: string, name: string): Promise<boolean> => {
     setAuthError(null);
+
+    // Store the name in localStorage temporarily so we can use it after Auth0 redirect
+    if (name) {
+      sessionStorage.setItem('pending-user-name', name);
+    }
+
     await loginWithRedirect({
       authorizationParams: {
         screen_hint: "signup",
@@ -220,7 +258,7 @@ function Auth0BackedAuthProvider({ children }: { children: ReactNode }) {
     if (!isAuthenticated || !auth0User) return null;
     return {
       email: auth0User.email || "",
-      name: auth0User.name || auth0User.nickname || "User",
+      name: profileData.name || auth0User.name || auth0User.nickname || "User",
       ...profileData,
     };
   }, [auth0User, isAuthenticated, profileData]);

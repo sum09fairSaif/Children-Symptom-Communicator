@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { goToLoadingPage } from "../Loading/Loading";
+import { useAuth } from "../../context/AuthContext";
+import { apiService } from "../../services/api.service";
+import type { CheckInResponse } from "../../types/api";
 
 interface SymptomMoodItem {
   label: string;
@@ -109,8 +111,12 @@ function ChipButton({ item, selected, onClick, disabled }: ChipButtonProps) {
 
 export default function SymptomTracker() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
   const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
+  const [energyLevel, setEnergyLevel] = useState<number>(3);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string>("");
 
   const toggleSymptom = (label: string) => {
     setSelectedSymptoms((prev) =>
@@ -132,9 +138,36 @@ export default function SymptomTracker() {
     );
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (selectedSymptoms.length === 0 && selectedMoods.length === 0) return;
-    goToLoadingPage(navigate);
+
+    setIsSubmitting(true);
+    setError("");
+
+    try {
+      const userId = user?.email || "guest";
+
+      const response = await apiService.submitCheckIn({
+        user_id: userId,
+        energy_level: energyLevel,
+        symptoms: selectedSymptoms.map(s => s.toLowerCase().replace(/\s+/g, '_')),
+        moods: selectedMoods.map(m => m.toLowerCase()),
+      });
+
+      // Navigate to recommendations page with the response data
+      navigate("/recommendations", {
+        state: {
+          recommendations: response.recommendations,
+          aiMessage: response.ai_message,
+          checkInId: response.check_in_id,
+        }
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to submit check-in. Please try again.");
+      console.error("Check-in error:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -189,7 +222,7 @@ export default function SymptomTracker() {
         {/* Back to home link */}
         <div style={{ marginBottom: "24px" }}>
           <Link
-            to="/landing"
+            to="/"
             style={{
               color: "#8B7B8B",
               fontSize: "14px",
@@ -243,6 +276,75 @@ export default function SymptomTracker() {
             How are you feeling today? Let's check in.
           </p>
         </div>
+
+        {/* Energy Level Section */}
+        <div style={{ marginBottom: "44px" }}>
+          <h2
+            style={{
+              fontFamily: "'Poppins', sans-serif",
+              fontSize: "22px",
+              fontWeight: 600,
+              color: "#5C3A5C",
+              margin: "0 0 16px",
+            }}
+          >
+            How's Your Energy Level?
+          </h2>
+          <div style={{ display: "flex", gap: "12px", justifyContent: "center" }}>
+            {[1, 2, 3, 4, 5].map((level) => (
+              <button
+                key={level}
+                onClick={() => setEnergyLevel(level)}
+                style={{
+                  width: "56px",
+                  height: "56px",
+                  borderRadius: "16px",
+                  border: energyLevel === level ? "2px solid #C8A2C8" : "2px solid rgba(200,162,200,0.25)",
+                  background: energyLevel === level
+                    ? "linear-gradient(135deg, #F3E8F9 0%, #FCE4EC 100%)"
+                    : "rgba(255,255,255,0.6)",
+                  color: energyLevel === level ? "#6B3A6B" : "#8B7B8B",
+                  fontSize: "20px",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                  transform: energyLevel === level ? "scale(1.1)" : "scale(1)",
+                  boxShadow: energyLevel === level
+                    ? "0 4px 15px rgba(200,162,200,0.35)"
+                    : "0 1px 4px rgba(0,0,0,0.04)",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = energyLevel === level ? "scale(1.15)" : "scale(1.05)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = energyLevel === level ? "scale(1.1)" : "scale(1)";
+                }}
+              >
+                {level}
+              </button>
+            ))}
+          </div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              marginTop: "12px",
+              padding: "0 8px",
+            }}
+          >
+            <span style={{ fontSize: "13px", color: "#B8A8B8" }}>Low</span>
+            <span style={{ fontSize: "13px", color: "#B8A8B8" }}>High</span>
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div
+          style={{
+            height: "1px",
+            background: "linear-gradient(90deg, transparent, rgba(200,162,200,0.3), transparent)",
+            margin: "0 0 44px",
+          }}
+        />
 
         {/* Symptoms Section */}
         <div style={{ marginBottom: "44px" }}>
@@ -361,30 +463,45 @@ export default function SymptomTracker() {
 
         {/* Submit */}
         <div style={{ textAlign: "center" }}>
+          {error && (
+            <div
+              style={{
+                marginBottom: "16px",
+                padding: "12px 20px",
+                borderRadius: "12px",
+                background: "#FFF0F0",
+                color: "#D4666B",
+                fontSize: "14px",
+                fontWeight: 500,
+              }}
+            >
+              {error}
+            </div>
+          )}
           <button
             onClick={handleSubmit}
-            disabled={selectedSymptoms.length === 0 && selectedMoods.length === 0}
+            disabled={isSubmitting || (selectedSymptoms.length === 0 && selectedMoods.length === 0)}
             style={{
               padding: "16px 56px",
               borderRadius: "50px",
               border: "none",
               background:
-                selectedSymptoms.length === 0 && selectedMoods.length === 0
+                isSubmitting || (selectedSymptoms.length === 0 && selectedMoods.length === 0)
                   ? "#E0D6E0"
                   : "linear-gradient(135deg, #C8A2C8 0%, #D4A5C8 50%, #E8A5B8 100%)",
               color:
-                selectedSymptoms.length === 0 && selectedMoods.length === 0
+                isSubmitting || (selectedSymptoms.length === 0 && selectedMoods.length === 0)
                   ? "#B8A8B8"
                   : "white",
               fontSize: "17px",
               fontFamily: "'Poppins', sans-serif",
               fontWeight: 700,
               cursor:
-                selectedSymptoms.length === 0 && selectedMoods.length === 0
+                isSubmitting || (selectedSymptoms.length === 0 && selectedMoods.length === 0)
                   ? "not-allowed"
                   : "pointer",
               boxShadow:
-                selectedSymptoms.length === 0 && selectedMoods.length === 0
+                isSubmitting || (selectedSymptoms.length === 0 && selectedMoods.length === 0)
                   ? "none"
                   : "0 8px 28px rgba(200,162,200,0.4)",
               transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -405,7 +522,7 @@ export default function SymptomTracker() {
                   : "0 8px 28px rgba(200,162,200,0.4)";
             }}
           >
-            Submit
+            {isSubmitting ? "Finding Workouts..." : "Submit"}
           </button>
           {(selectedSymptoms.length > 0 || selectedMoods.length > 0) && (
             <p

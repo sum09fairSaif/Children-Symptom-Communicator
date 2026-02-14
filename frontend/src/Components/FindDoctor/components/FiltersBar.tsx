@@ -79,7 +79,7 @@ export default function FiltersBar({
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
-  padding: "12px 12px",
+  padding: "10px 12px",
   borderRadius: 14,
   border: "1px solid rgba(140,120,246,0.22)",
   outline: "none",

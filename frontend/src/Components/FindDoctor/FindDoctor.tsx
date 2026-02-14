@@ -87,6 +87,7 @@ export default function FindDoctorPage() {
           />
           <BookingPanel
             doctor={selectedDoctor}
+            userInsurance={insurance}
             onConfirm={() => {
               if (!selectedDoctor) return;
               alert(`Confirmed appointment with ${selectedDoctor.name}!`);
