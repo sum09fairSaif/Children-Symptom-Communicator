@@ -1,5 +1,6 @@
 import "./Landing.css";
 import { useEffect } from "react";
+import logo from "../Assets/connecther-logo.svg";
 
 function Landing() {
   useEffect(() => {
