@@ -1,13 +1,17 @@
 import "./Landing.css";
-import { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import mainLogo from "../Assets/connecther-logo.png";
 import textLogo from "../Assets/text-logo.png";
 import heroImage from "../Assets/doctor-consultation.png";
 
 function Landing() {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const location = useLocation();
+  const navWrapRef = useRef<HTMLDivElement | null>(null);
+
 
   useEffect(() => {
     const displayName = user?.name || "Guest";
@@ -26,6 +30,32 @@ function Landing() {
     return () => window.removeEventListener("scroll", onScroll);
   }, [user?.name]);
 
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const onPointerDown = (event: MouseEvent) => {
+      if (!menuOpen) return;
+      if (!navWrapRef.current?.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [menuOpen]);
+
   return (
     <div className="landing-root">
       <div className="parallax-bg" aria-hidden="true" />
@@ -35,15 +65,48 @@ function Landing() {
           <img src={mainLogo} alt="" className="logo-img logo-main" />
           <img src={textLogo} alt="ConnectHER" className="logo-img logo-text" />
         </h1>
-        <div className="container">
-          <nav>
+        <div className="container" ref={navWrapRef}>
+          <button
+            type="button"
+            className="hamburger"
+            aria-label="Toggle navigation menu"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((prev) => !prev)}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+          <nav className={menuOpen ? "nav open" : "nav"}>
             <ul className="nav-links">
               <li>
+<<<<<<< HEAD
+                <Link
+                  to={isAuthenticated ? "/your-profile" : "/login"}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {isAuthenticated ? "Logged In" : "Login"}
+                </Link>
+=======
                 <Link to="/login">Login</Link>
+>>>>>>> 9e38cd5c9beea98cb1a835356e089c75b52990c0
               </li>
               <li>
-                <Link to="/register">Register</Link>
+                <Link to="/register" onClick={() => setMenuOpen(false)}>
+                  Register
+                </Link>
               </li>
+<<<<<<< HEAD
+              <li>
+                <Link
+                  to={isAuthenticated ? "/your-profile" : "/login"}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Your Profile
+                </Link>
+              </li>
+=======
+>>>>>>> 9e38cd5c9beea98cb1a835356e089c75b52990c0
             </ul>
           </nav>
         </div>
