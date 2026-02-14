@@ -1,5 +1,5 @@
 import "./App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Landing from "./Components/Landing/Landing";
 import LoginForm from "./Components/LoginForm/LoginForm";
@@ -9,12 +9,13 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* LANDING */}
         <Route path="/" element={<Landing />} />
-
-        {/* AUTH FLOW */}
         <Route path="/login" element={<LoginForm />} />
         <Route path="/register" element={<RegisterForm />} />
+        <Route path="/symptom-checker" element={<Landing />} />
+        <Route path="/find-a-provider" element={<Landing />} />
+        <Route path="/your-profile" element={<Landing />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );
