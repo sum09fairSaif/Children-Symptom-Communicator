@@ -1,5 +1,8 @@
 import "./Landing.css";
 import { useEffect, useState } from "react";
+import mainLogo from "../Assets/connecther-logo.png";
+import textLogo from "../Assets/text-logo.png";
+import heroImage from "../Assets/doctor-consultation.png";
 
 function Landing() {
   const [userName, setUserName] = useState("Guest");
@@ -37,6 +40,10 @@ function Landing() {
       <div className="parallax-bg" aria-hidden="true" />
 
       <header>
+        <h1 className="logo">
+          <img src={mainLogo} alt="" className="logo-img logo-main" />
+          <img src={textLogo} alt="ConnectHER" className="logo-img logo-text" />
+        </h1>
         <h1 className="logo">ConnectHER</h1>
         <p>Welcome, {userName}!</p>
         <div className="container">
@@ -58,9 +65,26 @@ function Landing() {
 
       <section id="hero">
         <div className="container">
-          <div className="hero-content">
-            <h2>Accessible Women's Healthcare, Anytime</h2>
-            <h3>Understand your symptoms. Find the right care.</h3>
+          <div className="hero-layout">
+            <div className="hero-content">
+              <h2>Accessible Women's Healthcare, Anytime</h2>
+              <h3>Understand your symptoms. Find the right care.</h3>
+              <div className="hero-actions">
+                <a href="/symptom-checker" className="service-button">
+                  Symptom Checker
+                </a>
+                <a href="/find-a-provider" className="service-button">
+                  Find a Provider
+                </a>
+              </div>
+            </div>
+            <div className="hero-visual">
+              <img
+                src={heroImage}
+                alt="Doctor consultation illustration"
+                className="hero-image"
+              />
+            </div>
           </div>
         </div>
       </section>
