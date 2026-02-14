@@ -5,9 +5,10 @@ import Landing from "./Components/Landing/Landing";
 import LoginForm from "./Components/LoginForm/LoginForm";
 import RegisterForm from "./Components/RegisterForm/RegisterForm";
 import FindDoctorPage from "./Components/FindDoctor/FindDoctor";
-import Dashboard from "./Components/Dashboard/Dashboard";
 import Onboarding from "./Components/Onboarding/Onboarding";
+import SymptomChecker from "./Components/SymptomChecker/SymptomChecker";
 import ProtectedRoute from "./Components/ProtectedRoute/ProtectedRoute";
+import Loading from "./Components/Loading/Loading";
 import { AuthProvider } from "./context/AuthContext";
 
 function App() {
@@ -19,7 +20,8 @@ function App() {
           <Route path="/login" element={<LoginForm />} />
           <Route path="/register" element={<RegisterForm />} />
 
-          <Route path="/symptom-checker" element={<Landing />} />
+          <Route path="/symptom-checker" element={<SymptomChecker />} />
+          <Route path="/loading" element={<Loading />} />
           <Route path="/find-a-provider" element={<FindDoctorPage />} />
 
           <Route
@@ -27,15 +29,6 @@ function App() {
             element={
               <ProtectedRoute requireOnboarding={false}>
                 <Onboarding />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/your-profile"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
               </ProtectedRoute>
             }
           />

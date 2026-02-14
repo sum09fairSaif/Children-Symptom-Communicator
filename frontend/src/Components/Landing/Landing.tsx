@@ -12,6 +12,7 @@ function Landing() {
   const location = useLocation();
   const navWrapRef = useRef<HTMLDivElement | null>(null);
 
+
   useEffect(() => {
     const displayName = user?.name || "Guest";
     document.title = `ConnectHER - Welcome, ${displayName}`;
@@ -79,18 +80,23 @@ function Landing() {
           <nav className={menuOpen ? "nav open" : "nav"}>
             <ul className="nav-links">
               <li>
+<<<<<<< HEAD
                 <Link
                   to={isAuthenticated ? "/your-profile" : "/login"}
                   onClick={() => setMenuOpen(false)}
                 >
                   {isAuthenticated ? "Logged In" : "Login"}
                 </Link>
+=======
+                <Link to="/login">Login</Link>
+>>>>>>> 9e38cd5c9beea98cb1a835356e089c75b52990c0
               </li>
               <li>
                 <Link to="/register" onClick={() => setMenuOpen(false)}>
                   Register
                 </Link>
               </li>
+<<<<<<< HEAD
               <li>
                 <Link
                   to={isAuthenticated ? "/your-profile" : "/login"}
@@ -99,6 +105,8 @@ function Landing() {
                   Your Profile
                 </Link>
               </li>
+=======
+>>>>>>> 9e38cd5c9beea98cb1a835356e089c75b52990c0
             </ul>
           </nav>
         </div>
