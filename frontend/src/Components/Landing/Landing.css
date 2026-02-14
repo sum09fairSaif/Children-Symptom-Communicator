@@ -129,6 +129,7 @@ header .container {
   display: flex;
   justify-content: flex-end;
   align-items: center;
+  position: relative;
   border: none;
   border-top: none;
   width: auto;
@@ -304,7 +305,7 @@ header .container {
   color: #4a3e63;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 900px) {
   #hero .container {
     padding: 26px 18px;
   }
@@ -323,13 +324,7 @@ header .container {
   }
 
   header .container {
-    justify-content: center;
-  }
-
-  .nav-links {
-    gap: 10px;
-    flex-wrap: wrap;
-    justify-content: center;
+    justify-content: flex-end;
   }
 
   .service-button {
@@ -338,5 +333,112 @@ header .container {
 
   .hero-image {
     width: min(360px, 100%);
+  }
+}
+
+/* =========================
+   HAMBURGER MENU STYLING
+   Works with:
+   <button className="hamburger"><span/><span/><span/></button>
+   <nav className={menuOpen ? "nav open" : "nav"}>
+   ========================= */
+
+/* Desktop: show normal nav, hide hamburger */
+.hamburger {
+  display: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 14px;
+  transition:
+    background 160ms ease,
+    transform 160ms ease;
+  position: relative;
+  z-index: 7; /* above dropdown */
+}
+
+.hamburger:hover {
+  background: rgba(139, 124, 246, 0.12);
+  transform: translateY(-1px);
+}
+
+.hamburger span {
+  display: block;
+  width: 26px;
+  height: 3px;
+  margin: 5px 0;
+  background: rgba(74, 62, 99, 0.92);
+  border-radius: 999px;
+}
+
+/* Make sure nav has a class to target (default desktop) */
+.nav {
+  display: block; /* your nav-links already handle flex */
+}
+
+/* Mobile: show hamburger, collapse nav into dropdown */
+@media (max-width: 1280px) {
+  .hamburger {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* remove the negative margin that looks weird on mobile */
+  .nav-links {
+    margin-top: 0;
+  }
+
+  /* Turn the nav into a dropdown panel */
+  .nav {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: min(260px, 84vw);
+    padding: 12px;
+
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(140, 120, 246, 0.18);
+    border-radius: 18px;
+    box-shadow: 0 18px 50px rgba(30, 20, 60, 0.14);
+
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+
+    z-index: 6;
+  }
+
+  .nav.open {
+    display: block;
+  }
+
+  /* Stack links vertically inside dropdown */
+  .nav-links {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+
+  .nav-links li {
+    width: 100%;
+  }
+
+  .nav-links a {
+    display: block;
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.55);
+    border: 1px solid rgba(140, 120, 246, 0.14);
+  }
+
+  .nav-links a:hover {
+    background: rgba(139, 124, 246, 0.12);
+    transform: none; /* avoid jumping in dropdown */
   }
 }

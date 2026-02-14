@@ -62,7 +62,9 @@ export default function FindDoctorPage() {
               const isValidZip = /^\d{5}(-\d{4})?$/.test(normalizedZip);
 
               if (normalizedZip && !isValidZip) {
-                alert("Please enter a valid US ZIP code (12345 or 12345-6789).");
+                alert(
+                  "Please enter a valid US ZIP code (12345 or 12345-6789).",
+                );
                 return;
               }
 
