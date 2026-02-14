@@ -26,8 +26,6 @@ By meeting women where they are physically and mentally, we empower them to stay
 **Auth:** Supabase Authentication  
 **AI:** Gemini API for intelligent recommendations and chatbot
 
----
-
 ## Get Started
 
 ### Prerequisites
@@ -71,18 +69,15 @@ By meeting women where they are physically and mentally, we empower them to stay
    # Backend (in another terminal)
    cd backend && npm run dev
    ```
-
 ## Safety
 
-⚠️ **Important Disclaimer:** ConnectHER is an informational tool and not a substitute for professional medical advice. Always consult a healthcare provider before starting any exercise program during pregnancy.
+⚠️ **Important Disclaimer:** ConnectHer is an informational tool and not a substitute for professional medical advice. Always consult a healthcare provider before starting any exercise program during pregnancy.
 
 All workout recommendations are:
 - Vetted for first-trimester safety
 - Include modifications for different symptom severities
 - Encourage rest when needed
 - Focus on low-impact, pregnancy-safe movements
-
----
 
 ## Future Additions
 
@@ -93,8 +88,6 @@ All workout recommendations are:
 - [ ] Integration with healthcare providers
 - [ ] Push notifications for daily check-ins
 - [ ] Wearable device integration
-
----
 
 ## Our Lovely Team! 👥
 
