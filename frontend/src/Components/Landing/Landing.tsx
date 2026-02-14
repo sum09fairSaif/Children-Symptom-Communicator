@@ -1,6 +1,6 @@
 import "./Landing.css";
 import { useEffect } from "react";
-import brandLogo from "../Assets/connecther-logo.svg";
+import brandLogo from "../Assets/full_logo.png";
 import heroImage from "../Assets/doctor-consultation.png";
 
 function Landing() {
