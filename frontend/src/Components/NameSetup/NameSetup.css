@@ -1,0 +1,139 @@
+.name-setup-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(160deg, #fff5f7 0%, #f5ebf8 40%, #ebf0fa 100%);
+  font-family: "Poppins", sans-serif;
+  padding: 20px;
+}
+
+.name-setup-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  padding: 3rem 2.5rem;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(200, 162, 200, 0.2);
+  animation: fadeIn 0.5s ease-out;
+}
+
+.name-setup-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.setup-icon {
+  font-size: 64px;
+  margin-bottom: 1rem;
+  animation: wave 1s ease-in-out infinite;
+}
+
+@keyframes wave {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(20deg);
+  }
+  75% {
+    transform: rotate(-20deg);
+  }
+}
+
+.setup-title {
+  font-size: clamp(28px, 5vw, 36px);
+  font-weight: 700;
+  color: #4a2a4a;
+  margin: 0 0 0.5rem;
+}
+
+.setup-subtitle {
+  font-size: 16px;
+  color: #8b7b8b;
+  margin: 0;
+}
+
+.name-setup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #5c3a5c;
+}
+
+.form-input {
+  padding: 14px 18px;
+  border: 2px solid rgba(200, 162, 200, 0.3);
+  border-radius: 12px;
+  font-size: 16px;
+  font-family: "Poppins", sans-serif;
+  color: #4a2a4a;
+  background: white;
+  transition: all 0.3s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #c8a2c8;
+  box-shadow: 0 0 0 3px rgba(200, 162, 200, 0.1);
+}
+
+.form-input::placeholder {
+  color: #b8a8b8;
+}
+
+.submit-button {
+  padding: 16px 32px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #c8a2c8 0%, #d4a5c8 50%, #e8a5b8 100%);
+  color: white;
+  font-size: 17px;
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 20px rgba(200, 162, 200, 0.3);
+  margin-top: 1rem;
+}
+
+.submit-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(200, 162, 200, 0.4);
+}
+
+.submit-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 600px) {
+  .name-setup-card {
+    padding: 2rem 1.5rem;
+  }
+}

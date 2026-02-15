@@ -33,7 +33,11 @@ export default function Loading() {
 
   return (
     <div className="loading-page">
-      <div className="loading-spinner" aria-hidden="true" />
+      <div className="loading-dots" aria-hidden="true">
+        <span className="loading-dot" />
+        <span className="loading-dot" />
+        <span className="loading-dot" />
+      </div>
       <h2 className="loading-heading">Creating your tailored picks ✨</h2>
       <p className="loading-text">
         We’re building personalized video recommendations just for you based on your symptoms. Almost there!

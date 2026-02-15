@@ -7,6 +7,9 @@ import RegisterForm from "./Components/RegisterForm/RegisterForm";
 import FindDoctorPage from "./Components/FindDoctor/FindDoctor";
 import Onboarding from "./Components/Onboarding/Onboarding";
 import SymptomChecker from "./Components/SymptomChecker/SymptomChecker";
+import Recommendations from "./Components/Recommendations/Recommendations";
+import Dashboard from "./Components/Dashboard/Dashboard";
+import NameSetup from "./Components/NameSetup/NameSetup";
 import ProtectedRoute from "./Components/ProtectedRoute/ProtectedRoute";
 import Loading from "./Components/Loading/Loading";
 import { AuthProvider } from "./context/AuthContext";
@@ -21,8 +24,27 @@ function App() {
           <Route path="/register" element={<RegisterForm />} />
 
           <Route path="/symptom-checker" element={<SymptomChecker />} />
+          <Route path="/recommendations" element={<Recommendations />} />
           <Route path="/loading" element={<Loading />} />
           <Route path="/find-a-provider" element={<FindDoctorPage />} />
+
+          <Route
+            path="/name-setup"
+            element={
+              <ProtectedRoute requireOnboarding={false}>
+                <NameSetup />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/your-profile"
+            element={
+              <ProtectedRoute requireOnboarding={false}>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
 
           <Route
             path="/onboarding"

@@ -2,10 +2,14 @@ import { Router } from 'express';
 import authRoutes from './authRoutes';
 import userRoutes from './userRoutes';
 import itemRoutes from './itemRoutes';
+import workoutRoutes from './workouts.js';  // Add .js extension
+import checkInRoutes from './checkIn.js';
+import favoritesRoutes from './favorites.js';
+import profileRoutes from './profile.js';
 
 const router = Router();
 
-// Health check endpoint
+// Health check
 router.get('/health', (_req, res) => {
   res.json({
     success: true,
@@ -18,5 +22,9 @@ router.get('/health', (_req, res) => {
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
 router.use('/items', itemRoutes);
+router.use('/workouts', workoutRoutes);
+router.use('/check-in', checkInRoutes);
+router.use('/favorites', favoritesRoutes);
+router.use('/profile', profileRoutes);
 
 export default router;
