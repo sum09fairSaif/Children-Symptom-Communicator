@@ -2,10 +2,40 @@ import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import type { SymptomType, MoodType } from "../../types/enums";
+import {
+  FiArrowLeft,
+  FiCheck,
+  FiZap,
+  FiSend,
+} from "react-icons/fi";
+import {
+  TbMoodSmile,
+  TbMoodSad,
+  TbMoodNervous,
+  TbMoodAngry,
+  TbMoodCrazyHappy,
+  TbMoodSick,
+  TbZzz,
+  TbStarFilled,
+} from "react-icons/tb";
+import {
+  PiBone,
+  PiHandFist,
+  PiPersonSimpleRun,
+  PiLightningFill,
+  PiThermometerHot,
+  PiSunHorizon,
+  PiBatteryLow,
+  PiBrain,
+  PiWind,
+  PiFlower,
+  PiHeartBreak,
+  PiSmileyXEyes,
+} from "react-icons/pi";
 
 interface SymptomMoodItem {
   label: string;
-  icon: string;
+  icon: React.ReactNode;
   color?: string;
 }
 
@@ -32,92 +62,50 @@ const LABEL_TO_SYMPTOM: Record<string, SymptomType> = {
   "Weak in General": "weak_in_general",
 };
 
-const symptoms = [
-  { label: "Back Pain", icon: "🦴" },
-  { label: "Weak Arms", icon: "💪" },
-  { label: "Weak Legs", icon: "🦵" },
-  { label: "Sciatica Pain", icon: "⚡" },
-  { label: "Nausea", icon: "🤢" },
-  { label: "Morning Sickness", icon: "🌅" },
-  { label: "Fatigue", icon: "😴" },
-  { label: "Headaches", icon: "🤕" },
-  { label: "Bloating", icon: "🎈" },
-  { label: "Weakness", icon: "🥀" },
-  { label: "Stomach Pain", icon: "😣" },
-  { label: "Weak in General", icon: "🫠" },
+const symptoms: SymptomMoodItem[] = [
+  { label: "Back Pain", icon: <PiBone size={18} /> },
+  { label: "Weak Arms", icon: <PiHandFist size={18} /> },
+  { label: "Weak Legs", icon: <PiPersonSimpleRun size={18} /> },
+  { label: "Sciatica Pain", icon: <PiLightningFill size={18} /> },
+  { label: "Nausea", icon: <PiThermometerHot size={18} /> },
+  { label: "Morning Sickness", icon: <PiSunHorizon size={18} /> },
+  { label: "Fatigue", icon: <PiBatteryLow size={18} /> },
+  { label: "Headaches", icon: <PiBrain size={18} /> },
+  { label: "Bloating", icon: <PiWind size={18} /> },
+  { label: "Weakness", icon: <PiFlower size={18} /> },
+  { label: "Stomach Pain", icon: <PiHeartBreak size={18} /> },
+  { label: "Weak in General", icon: <PiSmileyXEyes size={18} /> },
 ];
 
-const moods = [
-  { label: "Anxious", icon: "😰", color: "#E8A87C" },
-  { label: "Fear", icon: "😨", color: "#D4A5A5" },
-  { label: "Happy", icon: "😊", color: "#F9D976" },
-  { label: "Moody", icon: "🌧️", color: "#C4A1D4" },
-  { label: "Frustrated", icon: "😤", color: "#E88B8B" },
-  { label: "Energetic", icon: "⚡", color: "#A8E6CF" },
-  { label: "Lazy", icon: "🦥", color: "#B8CCE0" },
-  { label: "Productive", icon: "✨", color: "#95DAB6" },
+const moods: SymptomMoodItem[] = [
+  { label: "Anxious", icon: <TbMoodNervous size={18} />, color: "#E8A87C" },
+  { label: "Fear", icon: <TbMoodSad size={18} />, color: "#D4A5A5" },
+  { label: "Happy", icon: <TbMoodSmile size={18} />, color: "#F9D976" },
+  { label: "Moody", icon: <TbMoodSad size={18} />, color: "#C4A1D4" },
+  { label: "Frustrated", icon: <TbMoodAngry size={18} />, color: "#E88B8B" },
+  { label: "Energetic", icon: <TbMoodCrazyHappy size={18} />, color: "#A8E6CF" },
+  { label: "Lazy", icon: <TbMoodSick size={18} />, color: "#B8CCE0" },
+  { label: "Productive", icon: <TbStarFilled size={18} />, color: "#95DAB6" },
 ];
+
+const energyEmojis = ["😩", "😕", "😐", "🙂", "💪"];
 
 function ChipButton({ item, selected, onClick, disabled }: ChipButtonProps) {
   return (
     <button
       onClick={onClick}
       disabled={disabled && !selected}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "8px",
-        padding: "12px 20px",
-        borderRadius: "50px",
-        border: selected ? "2px solid #C8A2C8" : "2px solid rgba(200,162,200,0.25)",
-        background: selected
-          ? "linear-gradient(135deg, #F3E8F9 0%, #FCE4EC 100%)"
-          : "rgba(255,255,255,0.6)",
-        color: selected ? "#6B3A6B" : "#8B7B8B",
-        fontSize: "15px",
-        fontFamily: "'DM Sans', sans-serif",
-        fontWeight: selected ? 600 : 500,
-        cursor: disabled && !selected ? "not-allowed" : "pointer",
-        opacity: disabled && !selected ? 0.4 : 1,
-        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-        transform: selected ? "scale(1.05)" : "scale(1)",
-        boxShadow: selected
-          ? "0 4px 15px rgba(200,162,200,0.35)"
-          : "0 1px 4px rgba(0,0,0,0.04)",
-        letterSpacing: "0.2px",
-      }}
-      onMouseEnter={(e) => {
-        if (!disabled || selected) {
-          e.currentTarget.style.transform = selected ? "scale(1.07)" : "scale(1.04)";
-          e.currentTarget.style.boxShadow = "0 4px 18px rgba(200,162,200,0.3)";
-        }
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = selected ? "scale(1.05)" : "scale(1)";
-        e.currentTarget.style.boxShadow = selected
-          ? "0 4px 15px rgba(200,162,200,0.35)"
-          : "0 1px 4px rgba(0,0,0,0.04)";
-      }}
+      className="chip-btn"
+      data-selected={selected}
+      data-disabled={disabled && !selected}
     >
-      <span style={{ fontSize: "18px" }}>{item.icon}</span>
+      <span className="chip-icon" data-selected={selected}>
+        {item.icon}
+      </span>
       {item.label}
       {selected && (
-        <span
-          style={{
-            marginLeft: "2px",
-            width: "18px",
-            height: "18px",
-            borderRadius: "50%",
-            background: "#C8A2C8",
-            color: "white",
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "11px",
-            fontWeight: 700,
-          }}
-        >
-          ✓
+        <span className="chip-check">
+          <FiCheck size={11} strokeWidth={3} />
         </span>
       )}
     </button>
@@ -173,223 +161,67 @@ export default function SymptomTracker() {
     });
   };
 
+  const hasSelection = selectedSymptoms.length > 0 || selectedMoods.length > 0;
+
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "linear-gradient(160deg, #FFF5F7 0%, #F5EBF8 40%, #EBF0FA 100%)",
-        fontFamily: "'DM Sans', sans-serif",
-        position: "relative",
-        overflow: "hidden",
-      }}
-    >
+    <div className="sc-page">
       <link
-        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap"
         rel="stylesheet"
       />
 
-      {/* Decorative blobs */}
-      <div
-        style={{
-          position: "fixed",
-          top: "-120px",
-          right: "-80px",
-          width: "350px",
-          height: "350px",
-          borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(232,168,200,0.15) 0%, transparent 70%)",
-          pointerEvents: "none",
-        }}
-      />
-      <div
-        style={{
-          position: "fixed",
-          bottom: "-100px",
-          left: "-60px",
-          width: "300px",
-          height: "300px",
-          borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(200,162,200,0.12) 0%, transparent 70%)",
-          pointerEvents: "none",
-        }}
-      />
+      <div className="sc-container">
+        {/* Back link */}
+        <Link to="/" className="sc-back">
+          <FiArrowLeft size={16} />
+          Back to home
+        </Link>
 
-      <div
-        style={{
-          maxWidth: "680px",
-          margin: "0 auto",
-          padding: "48px 24px 100px",
-          animation: "fadeIn 0.5s ease-out",
-        }}
-      >
-        {/* Back to home link */}
-        <div style={{ marginBottom: "24px" }}>
-          <Link
-            to="/"
-            style={{
-              color: "#8B7B8B",
-              fontSize: "14px",
-              textDecoration: "none",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "6px",
-            }}
-          >
-            ← Back to home
-          </Link>
-        </div>
         {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: "48px" }}>
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "64px",
-              height: "64px",
-              borderRadius: "20px",
-              background: "linear-gradient(135deg, #F3E8F9, #FCE4EC)",
-              marginBottom: "20px",
-              fontSize: "28px",
-              boxShadow: "0 4px 16px rgba(200,162,200,0.2)",
-            }}
-          >
-            🤰
-          </div>
-          <h1
-            style={{
-              fontFamily: "'Poppins', sans-serif",
-              fontSize: "clamp(32px, 5vw, 42px)",
-              fontWeight: 700,
-              color: "#4A2A4A",
-              margin: "0 0 8px",
-              lineHeight: 1.2,
-            }}
-          >
-            Hello!
-          </h1>
-          <p
-            style={{
-              fontSize: "17px",
-              color: "#9B8B9B",
-              margin: 0,
-              fontWeight: 500,
-            }}
-          >
-            How are you feeling today? Let's check in.
+        <div className="sc-header">
+          <h1 className="sc-title">Daily Check-in</h1>
+          <p className="sc-subtitle">
+            Tap what applies to you today — it only takes a minute.
           </p>
         </div>
 
-        {/* Energy Level Section */}
-        <div style={{ marginBottom: "44px" }}>
-          <h2
-            style={{
-              fontFamily: "'Poppins', sans-serif",
-              fontSize: "22px",
-              fontWeight: 600,
-              color: "#5C3A5C",
-              margin: "0 0 16px",
-            }}
-          >
-            How's Your Energy Level?
-          </h2>
-          <div style={{ display: "flex", gap: "12px", justifyContent: "center" }}>
+        {/* Energy Level */}
+        <section className="sc-section">
+          <div className="sc-section-header">
+            <FiZap size={18} className="sc-section-icon" />
+            <h2 className="sc-section-title">Energy Level</h2>
+          </div>
+          <div className="energy-row">
             {[1, 2, 3, 4, 5].map((level) => (
               <button
                 key={level}
                 onClick={() => setEnergyLevel(level)}
-                style={{
-                  width: "56px",
-                  height: "56px",
-                  borderRadius: "16px",
-                  border: energyLevel === level ? "2px solid #C8A2C8" : "2px solid rgba(200,162,200,0.25)",
-                  background: energyLevel === level
-                    ? "linear-gradient(135deg, #F3E8F9 0%, #FCE4EC 100%)"
-                    : "rgba(255,255,255,0.6)",
-                  color: energyLevel === level ? "#6B3A6B" : "#8B7B8B",
-                  fontSize: "20px",
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                  transform: energyLevel === level ? "scale(1.1)" : "scale(1)",
-                  boxShadow: energyLevel === level
-                    ? "0 4px 15px rgba(200,162,200,0.35)"
-                    : "0 1px 4px rgba(0,0,0,0.04)",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = energyLevel === level ? "scale(1.15)" : "scale(1.05)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = energyLevel === level ? "scale(1.1)" : "scale(1)";
-                }}
+                className="energy-btn"
+                data-active={energyLevel === level}
               >
-                {level}
+                <span className="energy-emoji">{energyEmojis[level - 1]}</span>
+                <span className="energy-num">{level}</span>
               </button>
             ))}
           </div>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginTop: "12px",
-              padding: "0 8px",
-            }}
-          >
-            <span style={{ fontSize: "13px", color: "#B8A8B8" }}>Low</span>
-            <span style={{ fontSize: "13px", color: "#B8A8B8" }}>High</span>
+          <div className="energy-labels">
+            <span>Running on empty</span>
+            <span>Fully charged</span>
           </div>
-        </div>
+        </section>
 
-        {/* Divider */}
-        <div
-          style={{
-            height: "1px",
-            background: "linear-gradient(90deg, transparent, rgba(200,162,200,0.3), transparent)",
-            margin: "0 0 44px",
-          }}
-        />
-
-        {/* Symptoms Section */}
-        <div style={{ marginBottom: "44px" }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "baseline",
-              justifyContent: "space-between",
-              marginBottom: "20px",
-            }}
-          >
-            <h2
-              style={{
-                fontFamily: "'Poppins', sans-serif",
-                fontSize: "22px",
-                fontWeight: 600,
-                color: "#5C3A5C",
-                margin: 0,
-              }}
-            >
-              Enter Your Symptoms
-            </h2>
+        {/* Symptoms */}
+        <section className="sc-section">
+          <div className="sc-section-header">
+            <h2 className="sc-section-title">What's bothering you?</h2>
             <span
-              style={{
-                fontSize: "13px",
-                fontWeight: 600,
-                color: selectedSymptoms.length >= 5 ? "#D4A5A5" : "#B8A8B8",
-                background: selectedSymptoms.length >= 5 ? "#FFF0F0" : "#F8F4FA",
-                padding: "4px 12px",
-                borderRadius: "20px",
-              }}
+              className="sc-counter"
+              data-maxed={selectedSymptoms.length >= 5}
             >
-              {selectedSymptoms.length}/5
+              {selectedSymptoms.length} / 5
             </span>
           </div>
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "10px",
-            }}
-          >
+          <div className="chip-grid">
             {symptoms.map((s) => (
               <ChipButton
                 key={s.label}
@@ -400,58 +232,20 @@ export default function SymptomTracker() {
               />
             ))}
           </div>
-        </div>
+        </section>
 
-        {/* Divider */}
-        <div
-          style={{
-            height: "1px",
-            background: "linear-gradient(90deg, transparent, rgba(200,162,200,0.3), transparent)",
-            margin: "0 0 44px",
-          }}
-        />
-
-        {/* Mood Section */}
-        <div style={{ marginBottom: "48px" }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "baseline",
-              justifyContent: "space-between",
-              marginBottom: "20px",
-            }}
-          >
-            <h2
-              style={{
-                fontFamily: "'Poppins', sans-serif",
-                fontSize: "22px",
-                fontWeight: 600,
-                color: "#5C3A5C",
-                margin: 0,
-              }}
-            >
-              Enter Your Mood
-            </h2>
+        {/* Mood */}
+        <section className="sc-section">
+          <div className="sc-section-header">
+            <h2 className="sc-section-title">How's your mood?</h2>
             <span
-              style={{
-                fontSize: "13px",
-                fontWeight: 600,
-                color: selectedMoods.length >= 3 ? "#D4A5A5" : "#B8A8B8",
-                background: selectedMoods.length >= 3 ? "#FFF0F0" : "#F8F4FA",
-                padding: "4px 12px",
-                borderRadius: "20px",
-              }}
+              className="sc-counter"
+              data-maxed={selectedMoods.length >= 3}
             >
-              {selectedMoods.length}/3
+              {selectedMoods.length} / 3
             </span>
           </div>
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "10px",
-            }}
-          >
+          <div className="chip-grid">
             {moods.map((m) => (
               <ChipButton
                 key={m.label}
@@ -462,95 +256,274 @@ export default function SymptomTracker() {
               />
             ))}
           </div>
-        </div>
+        </section>
 
         {/* Submit */}
-        <div style={{ textAlign: "center" }}>
-          {error && (
-            <div
-              style={{
-                marginBottom: "16px",
-                padding: "12px 20px",
-                borderRadius: "12px",
-                background: "#FFF0F0",
-                color: "#D4666B",
-                fontSize: "14px",
-                fontWeight: 500,
-              }}
-            >
-              {error}
-            </div>
-          )}
+        <div className="sc-submit-area">
+          {error && <div className="sc-error">{error}</div>}
           <button
             onClick={handleSubmit}
-            disabled={selectedSymptoms.length === 0 && selectedMoods.length === 0}
-            style={{
-              padding: "16px 56px",
-              borderRadius: "50px",
-              border: "none",
-              background:
-                selectedSymptoms.length === 0 && selectedMoods.length === 0
-                  ? "#E0D6E0"
-                  : "linear-gradient(135deg, #C8A2C8 0%, #D4A5C8 50%, #E8A5B8 100%)",
-              color:
-                selectedSymptoms.length === 0 && selectedMoods.length === 0
-                  ? "#B8A8B8"
-                  : "white",
-              fontSize: "17px",
-              fontFamily: "'Poppins', sans-serif",
-              fontWeight: 700,
-              cursor:
-                selectedSymptoms.length === 0 && selectedMoods.length === 0
-                  ? "not-allowed"
-                  : "pointer",
-              boxShadow:
-                selectedSymptoms.length === 0 && selectedMoods.length === 0
-                  ? "none"
-                  : "0 8px 28px rgba(200,162,200,0.4)",
-              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-              transform: "scale(1)",
-              letterSpacing: "0.5px",
-            }}
-            onMouseEnter={(e) => {
-              if (selectedSymptoms.length > 0 || selectedMoods.length > 0) {
-                e.currentTarget.style.transform = "scale(1.05)";
-                e.currentTarget.style.boxShadow = "0 10px 36px rgba(200,162,200,0.5)";
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "scale(1)";
-              e.currentTarget.style.boxShadow =
-                selectedSymptoms.length === 0 && selectedMoods.length === 0
-                  ? "none"
-                  : "0 8px 28px rgba(200,162,200,0.4)";
-            }}
+            disabled={!hasSelection}
+            className="sc-submit-btn"
+            data-active={hasSelection}
           >
-            Submit
+            <FiSend size={18} />
+            Get my recommendations
           </button>
-          {(selectedSymptoms.length > 0 || selectedMoods.length > 0) && (
-            <p
-              style={{
-                marginTop: "14px",
-                fontSize: "13px",
-                color: "#B8A8B8",
-                animation: "fadeIn 0.3s ease-out",
-              }}
-            >
-              {selectedSymptoms.length} symptom{selectedSymptoms.length !== 1 ? "s" : ""} &
-              {" " + selectedMoods.length} mood{selectedMoods.length !== 1 ? "s" : ""} selected
+          {hasSelection && (
+            <p className="sc-selection-summary">
+              {selectedSymptoms.length} symptom{selectedSymptoms.length !== 1 ? "s" : ""} &{" "}
+              {selectedMoods.length} mood{selectedMoods.length !== 1 ? "s" : ""} selected
             </p>
           )}
         </div>
       </div>
 
       <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(12px); }
+        @keyframes scFadeUp {
+          from { opacity: 0; transform: translateY(16px); }
           to { opacity: 1; transform: translateY(0); }
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        .sc-page {
+          min-height: 100vh;
+          background: #FAF7F5;
+          font-family: 'DM Sans', sans-serif;
+        }
+
+        .sc-container {
+          max-width: 640px;
+          margin: 0 auto;
+          padding: 40px 20px 100px;
+          animation: scFadeUp 0.4s ease-out;
+        }
+
+        /* Back link */
+        .sc-back {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          color: #9B8E8E;
+          font-size: 14px;
+          text-decoration: none;
+          margin-bottom: 32px;
+          transition: color 0.2s;
+        }
+        .sc-back:hover { color: #6B5E5E; }
+
+        /* Header */
+        .sc-header {
+          margin-bottom: 40px;
+        }
+        .sc-title {
+          font-family: 'Poppins', sans-serif;
+          font-size: clamp(28px, 5vw, 36px);
+          font-weight: 700;
+          color: #3D2C2C;
+          margin-bottom: 6px;
+          line-height: 1.2;
+        }
+        .sc-subtitle {
+          font-size: 16px;
+          color: #A0908F;
+          font-weight: 400;
+          line-height: 1.5;
+        }
+
+        /* Sections */
+        .sc-section {
+          background: #fff;
+          border-radius: 16px;
+          padding: 24px;
+          margin-bottom: 20px;
+          border: 1px solid #F0EAE6;
+        }
+        .sc-section-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 18px;
+          gap: 10px;
+        }
+        .sc-section-icon {
+          color: #B07CC8;
+          flex-shrink: 0;
+        }
+        .sc-section-title {
+          font-family: 'DM Sans', sans-serif;
+          font-size: 17px;
+          font-weight: 600;
+          color: #3D2C2C;
+          flex: 1;
+        }
+        .sc-counter {
+          font-size: 12px;
+          font-weight: 600;
+          color: #B5A8A0;
+          background: #F7F3F0;
+          padding: 3px 10px;
+          border-radius: 20px;
+          white-space: nowrap;
+        }
+        .sc-counter[data-maxed="true"] {
+          color: #C87C7C;
+          background: #FDF2F0;
+        }
+
+        /* Energy */
+        .energy-row {
+          display: flex;
+          gap: 10px;
+          justify-content: center;
+        }
+        .energy-btn {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+          width: 58px;
+          padding: 12px 0 8px;
+          border-radius: 14px;
+          border: 2px solid #E8D0E6;
+          background: #F2D5F0;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+        .energy-btn[data-active="true"] {
+          border-color: #B07CC8;
+          background: #F8F0FC;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(176,124,200,0.15);
+        }
+        .energy-btn:hover:not([data-active="true"]) {
+          border-color: #D4B8D2;
+          background: #ECC8EA;
+        }
+        .energy-emoji { font-size: 22px; line-height: 1; }
+        .energy-num {
+          font-size: 12px;
+          font-weight: 600;
+          color: #B5A8A0;
+        }
+        .energy-btn[data-active="true"] .energy-num {
+          color: #7A4E8B;
+        }
+        .energy-labels {
+          display: flex;
+          justify-content: space-between;
+          margin-top: 10px;
+          padding: 0 4px;
+          font-size: 12px;
+          color: #C5B8B0;
+        }
+
+        /* Chips */
+        .chip-grid {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+        .chip-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          padding: 9px 16px;
+          border-radius: 10px;
+          border: 1.5px solid #E8D0E6;
+          background: #F2D5F0;
+          color: #7A6B6B;
+          font-size: 14px;
+          font-family: 'DM Sans', sans-serif;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          line-height: 1;
+        }
+        .chip-btn:hover:not([data-disabled="true"]) {
+          border-color: #D4B8D2;
+          background: #ECC8EA;
+        }
+        .chip-btn[data-selected="true"] {
+          border-color: #B07CC8;
+          background: #F8F0FC;
+          color: #4A3A5C;
+          font-weight: 600;
+        }
+        .chip-btn[data-disabled="true"] {
+          opacity: 0.35;
+          cursor: not-allowed;
+        }
+        .chip-icon {
+          display: inline-flex;
+          color: #C4A8CC;
+          transition: color 0.2s;
+        }
+        .chip-icon[data-selected="true"] {
+          color: #B07CC8;
+        }
+        .chip-check {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 17px;
+          height: 17px;
+          border-radius: 50%;
+          background: #B07CC8;
+          color: white;
+          margin-left: 2px;
+        }
+
+        /* Submit area */
+        .sc-submit-area {
+          text-align: center;
+          padding-top: 8px;
+        }
+        .sc-error {
+          margin-bottom: 14px;
+          padding: 10px 18px;
+          border-radius: 10px;
+          background: #FDF2F0;
+          color: #C87C7C;
+          font-size: 14px;
+          font-weight: 500;
+        }
+        .sc-submit-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          padding: 14px 40px;
+          border-radius: 12px;
+          border: none;
+          background: #DDD4CC;
+          color: #A09890;
+          font-size: 16px;
+          font-family: 'DM Sans', sans-serif;
+          font-weight: 600;
+          cursor: not-allowed;
+          transition: all 0.25s ease;
+          letter-spacing: 0.2px;
+        }
+        .sc-submit-btn[data-active="true"] {
+          background: #3D2C2C;
+          color: #fff;
+          cursor: pointer;
+          box-shadow: 0 4px 16px rgba(61,44,44,0.2);
+        }
+        .sc-submit-btn[data-active="true"]:hover {
+          background: #4E3C3C;
+          transform: translateY(-1px);
+          box-shadow: 0 6px 22px rgba(61,44,44,0.25);
+        }
+        .sc-selection-summary {
+          margin-top: 12px;
+          font-size: 13px;
+          color: #B5A8A0;
+          animation: scFadeUp 0.25s ease-out;
+        }
+
         button:focus-visible {
-          outline: 2px solid #C8A2C8;
+          outline: 2px solid #B07CC8;
           outline-offset: 2px;
         }
       `}</style>
