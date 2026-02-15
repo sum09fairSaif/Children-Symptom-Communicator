@@ -272,10 +272,9 @@ function Auth0BackedAuthProvider({ children }: { children: ReactNode }) {
     await loginWithRedirect({
       authorizationParams: {
         login_hint: email || undefined,
-        redirect_uri: `${window.location.origin}/login`,
       },
       appState: {
-        returnTo: "/",
+        returnTo: "/your-profile",
       },
     });
     return true;
@@ -284,7 +283,7 @@ function Auth0BackedAuthProvider({ children }: { children: ReactNode }) {
   const register = async (email: string, _password: string, name: string): Promise<boolean> => {
     setAuthError(null);
 
-    // Store the name in localStorage temporarily so we can use it after Auth0 redirect
+    // Store the name in sessionStorage temporarily so we can use it after Auth0 redirect
     if (name) {
       sessionStorage.setItem('pending-user-name', name);
     }
@@ -293,10 +292,9 @@ function Auth0BackedAuthProvider({ children }: { children: ReactNode }) {
       authorizationParams: {
         screen_hint: "signup",
         login_hint: email || undefined,
-        redirect_uri: `${window.location.origin}/register`,
       },
       appState: {
-        returnTo: "/",
+        returnTo: "/your-profile",
       },
     });
     return true;
