@@ -1,4 +1,5 @@
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, useNavigate, Link } from "react-router-dom";
+import { useState } from "react";
 
 interface LocationState {
   recommendations: Array<{
@@ -11,6 +12,7 @@ interface LocationState {
     workout_type: string;
     description: string;
     reasoning: string; // From Gemini AI
+    good_for_symptoms?: string[];
   }>;
   message: string; // AI's encouraging message
   checkIn?: {
@@ -23,9 +25,59 @@ function getYouTubeThumbnail(youtubeId: string): string {
   return `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
 }
 
+const iconColor = "#6B3A6B";
+const iconColorMuted = "#8B7B8B";
+
+const IconSparkles = ({ size = 28 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={iconColor} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, verticalAlign: "middle" }}>
+    <path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z" />
+    <path d="M5 14l1 3 3 1-1-3-3-1z" />
+    <path d="M19 14l1 3 3 1-1-3-3-1z" />
+  </svg>
+);
+
+const IconHeart = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C8A2C8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+  </svg>
+);
+
+const IconClock = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={iconColorMuted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+    <circle cx="12" cy="12" r="10" />
+    <polyline points="12 6 12 12 16 14" />
+  </svg>
+);
+
+const IconDumbbell = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={iconColorMuted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+    <path d="M3 7h4v10H3z" />
+    <path d="M17 7h4v10h-4z" />
+    <path d="M7 11h10v2H7z" />
+  </svg>
+);
+
+const IconYoga = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={iconColorMuted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+    <circle cx="12" cy="5" r="2" />
+    <path d="M12 7v4" />
+    <path d="M8 21l4-6 4 6" />
+    <path d="M12 11l-3 4" />
+    <path d="M12 11l3 4" />
+  </svg>
+);
+
+const IconPlay = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style={{ flexShrink: 0 }}>
+    <polygon points="5 3 19 12 5 21 5 3" />
+  </svg>
+);
+
 export default function WorkoutRecommendations() {
   const location = useLocation();
+  const navigate = useNavigate();
   const state = location.state as LocationState;
+  const [expandedWorkout, setExpandedWorkout] = useState<string | null>(null);
 
   if (!state || !state.recommendations || state.recommendations.length === 0) {
     return (
@@ -64,17 +116,17 @@ export default function WorkoutRecommendations() {
       style={{
         minHeight: "100vh",
         background: "linear-gradient(160deg, #FFF5F7 0%, #F5EBF8 40%, #EBF0FA 100%)",
-        fontFamily: "'DM Sans', sans-serif",
+        fontFamily: "'Poppins', sans-serif",
         position: "relative",
         overflow: "hidden",
       }}
     >
       <link
-        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
         rel="stylesheet"
       />
 
-      {/* Decorative background elements */}
+      {/* Decorative blob */}
       <div
         style={{
           position: "fixed",
@@ -87,28 +139,15 @@ export default function WorkoutRecommendations() {
           pointerEvents: "none",
         }}
       />
-      <div
-        style={{
-          position: "fixed",
-          bottom: "-100px",
-          left: "-60px",
-          width: "300px",
-          height: "300px",
-          borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(200,162,200,0.12) 0%, transparent 70%)",
-          pointerEvents: "none",
-        }}
-      />
 
       <div
         style={{
-          maxWidth: "720px",
+          maxWidth: "900px",
           margin: "0 auto",
           padding: "48px 24px 100px",
-          animation: "fadeIn 0.5s ease-out",
         }}
       >
-        {/* Back button */}
+        {/* Back link */}
         <div style={{ marginBottom: "24px" }}>
           <Link
             to="/symptom-checker"
@@ -126,277 +165,271 @@ export default function WorkoutRecommendations() {
         </div>
 
         {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: "32px" }}>
+        <div style={{ textAlign: "center", marginBottom: "40px" }}>
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "64px",
+              height: "64px",
+              borderRadius: "20px",
+              background: "linear-gradient(135deg, #F3E8F9, #FCE4EC)",
+              marginBottom: "20px",
+              boxShadow: "0 4px 16px rgba(200,162,200,0.2)",
+            }}
+            >
+            <IconSparkles />
+          </div>
           <h1
             style={{
-              fontFamily: "'Playfair Display', serif",
-              fontSize: "clamp(42px, 8vw, 56px)",
+              fontSize: "clamp(28px, 5vw, 38px)",
               fontWeight: 700,
               color: "#4A2A4A",
-              margin: "0 0 12px",
+              margin: "0 0 16px",
               lineHeight: 1.2,
             }}
           >
-            We've Got You!
+            Your Personalized Workouts
           </h1>
-          <p
-            style={{
-              fontSize: "18px",
-              color: "#6B3A6B",
-              margin: 0,
-              fontWeight: 500,
-            }}
-          >
-            Here are your personalized workouts
-          </p>
-        </div>
-
-        {/* AI Encouragement Message */}
-        {message && (
-          <div
-            style={{
-              background: "linear-gradient(135deg, rgba(232,168,200,0.1) 0%, rgba(200,162,200,0.1) 100%)",
-              borderRadius: "16px",
-              padding: "20px 24px",
-              marginBottom: "32px",
-              border: "1px solid rgba(200,162,200,0.2)",
-            }}
-          >
+          {message && (
             <p
               style={{
-                fontSize: "15px",
-                color: "#4A2A4A",
-                margin: 0,
-                lineHeight: 1.6,
-                fontStyle: "italic",
+                maxWidth: "560px",
+                margin: "0 auto",
+                fontSize: "16px",
+                color: "#5C3A5C",
+                lineHeight: 1.65,
+                fontWeight: 450,
+                letterSpacing: "0.01em",
               }}
             >
-              💜 {message}
+              {message}
             </p>
-          </div>
-        )}
+          )}
+        </div>
 
-        {/* Workout Cards */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
-          {recommendations.map((workout) => {
+        {/* Recommendations List */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+          {recommendations.map((workout, index) => {
+            const isExpanded = expandedWorkout === workout.id;
             const thumbnailUrl = getYouTubeThumbnail(workout.youtube_id);
 
             return (
               <div
                 key={workout.id}
                 style={{
-                  background: "rgba(255,255,255,0.95)",
-                  borderRadius: "20px",
-                  overflow: "hidden",
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
-                  border: "1px solid rgba(200,162,200,0.15)",
+                  background: "rgba(255,255,255,0.85)",
+                  borderRadius: "24px",
+                  padding: "24px",
+                  boxShadow: "0 2px 24px rgba(200,162,200,0.08)",
                   transition: "all 0.3s ease",
+                  cursor: "pointer",
                 }}
+                onClick={() => setExpandedWorkout(isExpanded ? null : workout.id)}
               >
-                {/* Video Link Section */}
-                <a
-                  href={workout.youtube_url as string}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    textDecoration: "none",
-                    color: "inherit",
-                    display: "block",
-                  }}
-                >
-                  <div style={{ display: "flex", gap: "20px", padding: "20px" }}>
-                    {/* Thumbnail */}
-                    <div
+                <div style={{ display: "flex", gap: "20px", alignItems: "flex-start" }}>
+                  {/* Rank Badge */}
+                  <div
+                    style={{
+                      width: "42px",
+                      height: "42px",
+                      borderRadius: "12px",
+                      background: "linear-gradient(135deg, #C8A2C8, #D4A5C8)",
+                      color: "white",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "18px",
+                      fontWeight: 700,
+                      flexShrink: 0,
+                    }}
+                  >
+                    {index + 1}
+                  </div>
+
+                  <div style={{ flex: 1 }}>
+                    {/* Workout Title */}
+                    <h3
                       style={{
-                        width: "200px",
-                        minWidth: "200px",
-                        height: "112px",
-                        borderRadius: "12px",
-                        overflow: "hidden",
-                        background: "rgba(200,162,200,0.2)",
-                        flexShrink: 0,
-                        position: "relative",
+                        fontSize: "20px",
+                        fontWeight: 600,
+                        color: "#4A2A4A",
+                        margin: "0 0 12px",
                       }}
                     >
-                      {thumbnailUrl ? (
-                        <>
-                          <img
-                            src={thumbnailUrl}
-                            alt={workout.title}
-                            style={{
-                              width: "100%",
-                              height: "100%",
-                              objectFit: "cover",
-                            }}
-                          />
-                          {/* Play button overlay */}
-                          <div
-                            style={{
-                              position: "absolute",
-                              top: "50%",
-                              left: "50%",
-                              transform: "translate(-50%, -50%)",
-                              width: "48px",
-                              height: "48px",
-                              background: "rgba(0,0,0,0.7)",
-                              borderRadius: "50%",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              fontSize: "20px",
-                            }}
-                          >
-                            ▶️
-                          </div>
-                        </>
-                      ) : (
-                        <div
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: "14px",
-                            color: "#8B7B8B",
-                          }}
-                        >
-                          Video
-                        </div>
-                      )}
+                      {workout.title}
+                    </h3>
+
+                    {/* Workout Details */}
+                    <div style={{ display: "flex", gap: "16px", marginBottom: "12px", flexWrap: "wrap" }}>
+                      <span style={{ fontSize: "14px", color: "#8B7B8B", display: "flex", alignItems: "center", gap: "6px" }}>
+                        <IconClock /> {workout.duration} min
+                      </span>
+                      <span style={{ fontSize: "14px", color: "#8B7B8B", display: "flex", alignItems: "center", gap: "6px", textTransform: "capitalize" }}>
+                        <IconDumbbell /> {workout.intensity_level}
+                      </span>
+                      <span style={{ fontSize: "14px", color: "#8B7B8B", display: "flex", alignItems: "center", gap: "6px", textTransform: "capitalize" }}>
+                        <IconYoga /> {workout.workout_type.replace(/_/g, ' ')}
+                      </span>
                     </div>
 
-                    {/* Workout Info */}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <h3
-                        style={{
-                          fontFamily: "'Poppins', sans-serif",
-                          fontSize: "18px",
-                          fontWeight: 600,
-                          color: "#4A2A4A",
-                          margin: "0 0 8px",
-                          lineHeight: 1.4,
-                        }}
-                      >
-                        {workout.title}
-                      </h3>
+                    {/* AI Reasoning */}
+                    <div
+                      style={{
+                        padding: "14px 18px",
+                        borderRadius: "16px",
+                        background: "linear-gradient(135deg, rgba(243,232,249,0.4) 0%, rgba(248,240,252,0.35) 100%)",
+                        fontSize: "14px",
+                        color: "#6B3A6B",
+                        lineHeight: 1.55,
+                        marginBottom: isExpanded ? "16px" : 0,
+                      }}
+                    >
+                      <span style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", gap: "4px" }}>
+                        <strong style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}><IconSparkles size={14} /> Why this workout:</strong>
+                        <span>{workout.reasoning}</span>
+                      </span>
+                    </div>
+
+                    {/* Expanded Details */}
+                    {isExpanded && (
                       <div
                         style={{
-                          display: "flex",
-                          gap: "12px",
-                          marginBottom: "12px",
-                          flexWrap: "wrap",
+                          marginTop: "16px",
+                          paddingTop: "16px",
+                          borderTop: "1px solid rgba(200,162,200,0.08)",
+                          animation: "fadeIn 0.3s ease-out",
                         }}
                       >
-                        <span
+                        {/* Thumbnail */}
+                        {thumbnailUrl && (
+                          <div style={{ marginBottom: "16px", borderRadius: "16px", overflow: "hidden" }}>
+                            <img
+                              src={thumbnailUrl}
+                              alt={workout.title}
+                              style={{
+                                width: "100%",
+                                maxHeight: "300px",
+                                objectFit: "cover",
+                              }}
+                            />
+                          </div>
+                        )}
+
+                        <p style={{ fontSize: "14px", color: "#6B3A6B", lineHeight: 1.6, marginBottom: "16px" }}>
+                          {workout.description}
+                        </p>
+
+                        {workout.good_for_symptoms && workout.good_for_symptoms.length > 0 && (
+                          <div style={{ marginBottom: "16px" }}>
+                            <strong style={{ fontSize: "14px", color: "#5C3A5C", display: "block", marginBottom: "8px" }}>
+                              Helps with:
+                            </strong>
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                              {workout.good_for_symptoms.map((symptom, i) => (
+                                <span
+                                  key={i}
+                                  style={{
+                                    padding: "6px 12px",
+                                    borderRadius: "20px",
+                                    background: "rgba(168,230,207,0.3)",
+                                    color: "#2E7D32",
+                                    fontSize: "13px",
+                                    fontWeight: 500,
+                                    textTransform: "capitalize",
+                                  }}
+                                >
+                                  {symptom.replace(/_/g, ' ')}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Watch Video Button */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.open(workout.youtube_url, "_blank");
+                          }}
                           style={{
-                            fontSize: "13px",
-                            color: "#8B7B8B",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
+                            padding: "12px 24px",
+                            borderRadius: "12px",
+                            border: "none",
+                            background: "linear-gradient(135deg, #C8A2C8, #D4A5C8)",
+                            color: "white",
+                            fontSize: "14px",
+                            fontWeight: 600,
+                            cursor: "pointer",
+                            transition: "all 0.2s ease",
+                            width: "100%",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = "scale(1.02)";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = "scale(1)";
                           }}
                         >
-                          {workout.duration} min
-                        </span>
-                        <span
-                          style={{
-                            fontSize: "13px",
-                            color: "#8B7B8B",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            textTransform: "capitalize",
-                          }}
-                        >
-                          {workout.intensity_level}
-                        </span>
-                        <span
-                          style={{
-                            fontSize: "13px",
-                            color: "#8B7B8B",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            textTransform: "capitalize",
-                          }}
-                        >
-                          {workout.workout_type.replace(/_/g, ' ')}
-                        </span>
+                          <span style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
+                            <IconPlay /> Watch Video on YouTube
+                          </span>
+                        </button>
                       </div>
+                    )}
+
+                    {/* Expand indicator */}
+                    <div
+                      style={{
+                        marginTop: "12px",
+                        fontSize: "13px",
+                        color: "#B8A8B8",
+                        textAlign: "center",
+                      }}
+                    >
+                      {isExpanded ? "Click to collapse ▲" : "Click to see more ▼"}
                     </div>
                   </div>
-                </a>
-
-                {/* AI Reasoning Section */}
-                <div
-                  style={{
-                    padding: "16px 20px",
-                    background: "rgba(243,232,249,0.5)",
-                    borderTop: "1px solid rgba(200,162,200,0.1)",
-                  }}
-                >
-                  <p
-                    style={{
-                      fontSize: "14px",
-                      color: "#6B3A6B",
-                      margin: "0 0 4px",
-                      fontWeight: 600,
-                    }}
-                  >
-                    ✨ Why this workout?
-                  </p>
-                  <p
-                    style={{
-                      fontSize: "14px",
-                      color: "#6B3A6B",
-                      margin: 0,
-                      lineHeight: 1.6,
-                    }}
-                  >
-                    {workout.reasoning}
-                  </p>
-                </div>
-
-                {/* Optional: Favorite Button */}
-                <div style={{ padding: "12px 20px", textAlign: "center" }}>
-                  <button
-                    onClick={() => {
-                      // TODO: Call POST /api/favorites
-                      console.log('Add to favorites:', workout.id);
-                    }}
-                    style={{
-                      background: "linear-gradient(135deg, #E8A8C8 0%, #C8A2C8 100%)",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "12px",
-                      padding: "10px 24px",
-                      fontSize: "14px",
-                      fontWeight: 600,
-                      cursor: "pointer",
-                      transition: "all 0.2s ease",
-                    }}
-                  >
-                    ❤️ Save to Favorites
-                  </button>
                 </div>
               </div>
             );
           })}
         </div>
+
+        {/* Back to Dashboard */}
+        <div style={{ marginTop: "48px", textAlign: "center" }}>
+          <button
+            onClick={() => navigate("/your-profile")}
+            style={{
+              padding: "14px 32px",
+              borderRadius: "50px",
+              border: "2px solid #C8A2C8",
+              background: "transparent",
+              color: "#C8A2C8",
+              fontSize: "15px",
+              fontWeight: 600,
+              cursor: "pointer",
+              transition: "all 0.3s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "#C8A2C8";
+              e.currentTarget.style.color = "white";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "transparent";
+              e.currentTarget.style.color = "#C8A2C8";
+            }}
+          >
+            Go to Dashboard
+          </button>
+        </div>
       </div>
 
       <style>{`
         @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(12px); }
+          from { opacity: 0; transform: translateY(8px); }
           to { opacity: 1; transform: translateY(0); }
-        }
-        a:hover h3 {
-          color: #C8A2C8 !important;
-        }
-        button:hover {
-          transform: scale(1.02);
-          box-shadow: 0 6px 20px rgba(200,162,200,0.3);
         }
       `}</style>
     </div>

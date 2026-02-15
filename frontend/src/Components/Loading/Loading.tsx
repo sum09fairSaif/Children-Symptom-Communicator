@@ -44,11 +44,11 @@ export default function Loading() {
       aiMessage?: string;
       checkInId?: string;
     }) => {
-      navigate("/recommendations", {
+      navigate("/workout-recommendations", {
         state: {
           recommendations: result.recommendations,
-          aiMessage: result.aiMessage,
-          checkInId: result.checkInId,
+          message: result.aiMessage ?? "",
+          checkIn: result.checkInId ? { id: result.checkInId, created_at: "" } : undefined,
         },
         replace: true,
       });

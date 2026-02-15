@@ -7,7 +7,6 @@ import RegisterForm from "./Components/RegisterForm/RegisterForm";
 import FindDoctorPage from "./Components/FindDoctor/FindDoctor";
 import Onboarding from "./Components/Onboarding/Onboarding";
 import SymptomChecker from "./Components/SymptomChecker/SymptomChecker";
-import Recommendations from "./Components/Recommendations/Recommendations";
 import Dashboard from "./Components/Dashboard/Dashboard";
 import NameSetup from "./Components/NameSetup/NameSetup";
 import ProtectedRoute from "./Components/ProtectedRoute/ProtectedRoute";
@@ -25,7 +24,6 @@ function App() {
           <Route path="/register" element={<RegisterForm />} />
 
           <Route path="/symptom-checker" element={<SymptomChecker />} />
-          <Route path="/recommendations" element={<Recommendations />} />
           <Route path="/loading" element={<Loading />} />
           <Route path="/workout-recommendations" element={<WorkoutRecommendations />} />
           <Route path="/find-a-provider" element={<FindDoctorPage />} />
