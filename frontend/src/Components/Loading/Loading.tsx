@@ -1,31 +1,95 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { apiService } from "../../services/api.service";
+import type { CheckInRequest } from "../../types/api";
 import "./Loading.css";
 
-/** Key used in sessionStorage to allow access to the loading page. */
-export const REPORT_SUBMITTED_KEY = "connecther-report-submitted";
+/** Duration to show loading before navigating to workout recommendations (ms). */
+const LOADING_DURATION_MS = 1500;
 
-/**
- * Call this after the user submits their symptom report and you're about to create recommendations.
- * Sets the flag so /loading is allowed, then navigates to the loading page.
- */
-export function goToLoadingPage(navigate: (to: string, options?: { replace?: boolean }) => void) {
-  sessionStorage.setItem(REPORT_SUBMITTED_KEY, "true");
-  navigate("/loading", { replace: true });
+/** Normalize symptom values to match database enum (symptom_type). */
+function normalizeSymptoms(symptoms: string[]): string[] {
+  return symptoms.map((s) => (s === "weak_arms" ? "weak_arm" : s));
 }
 
 export default function Loading() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [allowed, setAllowed] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const submitted = sessionStorage.getItem(REPORT_SUBMITTED_KEY);
-    if (!submitted) {
-      navigate("/", { replace: true });
+    const state = location.state as Record<string, unknown> | null;
+    const hasCheckInData = state && typeof state === "object" && "checkInData" in state;
+    const hasRecommendations = state && typeof state === "object" && "recommendations" in state;
+
+    if (!hasCheckInData && !hasRecommendations) {
+      navigate("/symptom-checker", { replace: true });
       return;
     }
     setAllowed(true);
-  }, [navigate]);
+  }, [navigate, location.state]);
+
+  useEffect(() => {
+    if (allowed !== true) return;
+
+    const state = location.state as Record<string, unknown> | null;
+    const checkInData = state?.checkInData as CheckInRequest | undefined;
+
+    const navigateToRecommendations = (result: {
+      recommendations: unknown[];
+      aiMessage?: string;
+      checkInId?: string;
+    }) => {
+      navigate("/workout-recommendations", {
+        state: {
+          recommendations: result.recommendations,
+          aiMessage: result.aiMessage,
+          checkInId: result.checkInId,
+        },
+        replace: true,
+      });
+    };
+
+    if (checkInData) {
+      const normalizedData: CheckInRequest = {
+        ...checkInData,
+        symptoms: normalizeSymptoms(checkInData.symptoms),
+      };
+      const minDuration = new Promise<void>((r) => setTimeout(r, LOADING_DURATION_MS));
+      const apiCall = apiService.submitCheckIn(normalizedData);
+
+      Promise.all([minDuration, apiCall])
+        .then(([, res]) => {
+          const data = res as { recommendations?: unknown[]; ai_message?: string; message?: string; check_in_id?: string };
+          navigateToRecommendations({
+            recommendations: data.recommendations ?? [],
+            aiMessage: data.ai_message ?? data.message,
+            checkInId: data.check_in_id,
+          });
+        })
+        .catch((err) => {
+          const message = err instanceof Error ? err.message : "Failed to submit check-in.";
+          const isNetworkError = message === "Failed to fetch" || message.includes("NetworkError");
+          navigate("/symptom-checker", {
+            replace: true,
+            state: {
+              error: isNetworkError
+                ? "Could not connect to the server. Make sure the backend is running (cd backend && npm run dev)."
+                : message,
+            },
+          });
+        });
+    } else if (state?.recommendations) {
+      const timer = setTimeout(() => {
+        navigateToRecommendations({
+          recommendations: state.recommendations as unknown[],
+          aiMessage: state.aiMessage as string | undefined,
+          checkInId: state.checkInId as string | undefined,
+        });
+      }, LOADING_DURATION_MS);
+      return () => clearTimeout(timer);
+    }
+  }, [allowed, navigate, location.state]);
 
   if (allowed !== true) {
     return null;

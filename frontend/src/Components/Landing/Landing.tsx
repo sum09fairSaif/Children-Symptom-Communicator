@@ -82,7 +82,7 @@ function Landing() {
               </li>
               <li>
                 <Link
-                  to={isAuthenticated ? "/your-profile" : "/login"}
+                  to="/your-profile"
                   onClick={() => setMenuOpen(false)}
                 >
                   Your Profile

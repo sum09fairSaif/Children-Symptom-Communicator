@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { apiService } from "../../services/api.service";
-import type { CheckInResponse } from "../../types/api";
+import type { SymptomType, MoodType } from "../../types/enums";
 
 interface SymptomMoodItem {
   label: string;
@@ -16,6 +15,22 @@ interface ChipButtonProps {
   onClick: () => void;
   disabled: boolean;
 }
+
+/** Maps UI labels to database enum values (symptom_type) */
+const LABEL_TO_SYMPTOM: Record<string, SymptomType> = {
+  "Back Pain": "back_pain",
+  "Weak Arms": "weak_arm",
+  "Weak Legs": "weak_legs",
+  "Sciatica Pain": "sciatica_pain",
+  "Nausea": "nausea",
+  "Morning Sickness": "morning_sickness",
+  "Fatigue": "fatigue",
+  "Headaches": "headaches",
+  "Bloating": "bloating",
+  "Weakness": "weakness",
+  "Stomach Pain": "stomach_pain",
+  "Weak in General": "weak_in_general",
+};
 
 const symptoms = [
   { label: "Back Pain", icon: "🦴" },
@@ -111,12 +126,12 @@ function ChipButton({ item, selected, onClick, disabled }: ChipButtonProps) {
 
 export default function SymptomTracker() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
   const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
   const [energyLevel, setEnergyLevel] = useState<number>(3);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string>("");
+  const error = (location.state as { error?: string } | null)?.error ?? "";
 
   const toggleSymptom = (label: string) => {
     setSelectedSymptoms((prev) =>
@@ -138,36 +153,24 @@ export default function SymptomTracker() {
     );
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (selectedSymptoms.length === 0 && selectedMoods.length === 0) return;
 
-    setIsSubmitting(true);
-    setError("");
+    const userId = user?.email || "guest";
+    const checkInData = {
+      user_id: userId,
+      energy_level: energyLevel,
+      symptoms: selectedSymptoms
+        .map((s) => LABEL_TO_SYMPTOM[s])
+        .filter((s): s is SymptomType => s != null),
+      moods: selectedMoods.map((m) => m.toLowerCase() as MoodType),
+    };
 
-    try {
-      const userId = user?.email || "guest";
-
-      const response = await apiService.submitCheckIn({
-        user_id: userId,
-        energy_level: energyLevel,
-        symptoms: selectedSymptoms.map(s => s.toLowerCase().replace(/\s+/g, '_')),
-        moods: selectedMoods.map(m => m.toLowerCase()),
-      });
-
-      // Navigate to recommendations page with the response data
-      navigate("/recommendations", {
-        state: {
-          recommendations: response.recommendations,
-          aiMessage: response.ai_message,
-          checkInId: response.check_in_id,
-        }
-      });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to submit check-in. Please try again.");
-      console.error("Check-in error:", err);
-    } finally {
-      setIsSubmitting(false);
-    }
+    // Navigate immediately to loading page; it will make the API call and then go to recommendations
+    navigate("/loading", {
+      replace: true,
+      state: { checkInData },
+    });
   };
 
   return (
@@ -480,28 +483,28 @@ export default function SymptomTracker() {
           )}
           <button
             onClick={handleSubmit}
-            disabled={isSubmitting || (selectedSymptoms.length === 0 && selectedMoods.length === 0)}
+            disabled={selectedSymptoms.length === 0 && selectedMoods.length === 0}
             style={{
               padding: "16px 56px",
               borderRadius: "50px",
               border: "none",
               background:
-                isSubmitting || (selectedSymptoms.length === 0 && selectedMoods.length === 0)
+                selectedSymptoms.length === 0 && selectedMoods.length === 0
                   ? "#E0D6E0"
                   : "linear-gradient(135deg, #C8A2C8 0%, #D4A5C8 50%, #E8A5B8 100%)",
               color:
-                isSubmitting || (selectedSymptoms.length === 0 && selectedMoods.length === 0)
+                selectedSymptoms.length === 0 && selectedMoods.length === 0
                   ? "#B8A8B8"
                   : "white",
               fontSize: "17px",
               fontFamily: "'Poppins', sans-serif",
               fontWeight: 700,
               cursor:
-                isSubmitting || (selectedSymptoms.length === 0 && selectedMoods.length === 0)
+                selectedSymptoms.length === 0 && selectedMoods.length === 0
                   ? "not-allowed"
                   : "pointer",
               boxShadow:
-                isSubmitting || (selectedSymptoms.length === 0 && selectedMoods.length === 0)
+                selectedSymptoms.length === 0 && selectedMoods.length === 0
                   ? "none"
                   : "0 8px 28px rgba(200,162,200,0.4)",
               transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -522,7 +525,7 @@ export default function SymptomTracker() {
                   : "0 8px 28px rgba(200,162,200,0.4)";
             }}
           >
-            {isSubmitting ? "Finding Workouts..." : "Submit"}
+            Submit
           </button>
           {(selectedSymptoms.length > 0 || selectedMoods.length > 0) && (
             <p
